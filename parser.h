@@ -27,9 +27,9 @@ private:
     vector<int> passagem_unica(code_t code);
     int define_exists(const define_t procura);
     int symbol_exists(string procura);
-	std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
-	string translate(inst_t* rinst);
+	static string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 public:
+	static string translate(inst_t* rinst);
     static vector<string> instruction_list;
 	static std::map<string, string> translation;
     /**Metodos**/

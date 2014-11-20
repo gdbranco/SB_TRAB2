@@ -1,6 +1,6 @@
 #include "parser.h"
 vector<string> PARSER::instruction_list;
-map<string, string> translation;
+map<string, string> PARSER::translation;
 string PARSER::retiraComentarios(string _linha)
 {
     size_t found = _linha.find(';');
@@ -670,7 +670,7 @@ bool PARSER::isinst(string _inst,inst_t* rinst)
     return achei;
 }
 
-std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+std::string PARSER::ReplaceAll(std::string str, const std::string& from, const std::string& to) {
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
@@ -679,13 +679,12 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
     return str;
 }
 
-string translate(inst_t* rinst) {
+string PARSER::translate(inst_t* rinst) {
 	string new_code = PARSER::translation[rinst->name];
 	vector<string>::iterator arg_it;
-
 	for (int i = 0; i < rinst->arg_list.size(); i++) {
 		new_code = ReplaceAll(new_code, "_L"+i+1, (*arg_it));
 	}
-
+	return new_code;
 }
 
