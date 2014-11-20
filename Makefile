@@ -5,7 +5,7 @@ CFLAGS=-ansi -Wall -c -g
 all: prog
 
 prog: parser.o defines.o macroTable.o
-	g++ -g main.cpp parser.o MacroTable.o defines.o -o montador
+	g++ -g main.cpp parser.o MacroTable.o defines.o -o tradutor.out
 
 defines.o: defines.h defines.cpp
 	g++ $(CFLAGS) defines.cpp
@@ -20,4 +20,4 @@ clean:
 	rm -f *.pre
 	rm -f *.mcr
 	rm -f *.o
-	rm -f montador
+	rm -f *.out

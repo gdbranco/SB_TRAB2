@@ -670,7 +670,8 @@ bool PARSER::isinst(string _inst,inst_t* rinst)
     return achei;
 }
 
-std::string PARSER::ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+std::string PARSER::ReplaceAll(std::string str, const std::string& from, const std::string& to)
+{
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
@@ -679,11 +680,18 @@ std::string PARSER::ReplaceAll(std::string str, const std::string& from, const s
     return str;
 }
 
-string PARSER::translate(inst_t* rinst) {
+string PARSER::translate(inst_t* rinst) 
+{
+	char buffer[5];
+	int i=0;
 	string new_code = PARSER::translation[rinst->name];
-	vector<string>::iterator arg_it;
-	for (int i = 0; i < rinst->arg_list.size(); i++) {
-		new_code = ReplaceAll(new_code, "_L"+i+1, (*arg_it));
+	vector<string>::iterator arg_it = rinst->arg_list.begin();
+	while(arg_it!=rinst->arg_list.end())
+	{
+		sprintf(buffer,"_L%d",i+1);
+		new_code = ReplaceAll(new_code, string(buffer), (*arg_it));
+		i++;
+		arg_it++;
 	}
 	return new_code;
 }
