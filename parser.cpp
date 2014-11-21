@@ -33,36 +33,23 @@ void PARSER::inicializa_paradas()
     instruction_list.push_back(instructions::COPY);
     instruction_list.push_back(instructions::LOAD);
     instruction_list.push_back(instructions::STORE);
-    instruction_list.push_back(instructions::INPUT);
-    instruction_list.push_back(instructions::OUTPUT);
+    instruction_list.push_back(instructions::C_INPUT);
+    instruction_list.push_back(instructions::C_OUTPUT);
     instruction_list.push_back(instructions::STOP);
 
-	translation["STOP"] = "mov eax,1\n\
-							mov ebx,0\n\
-							int 0x80";
+	translation["STOP"] = "mov eax,1\nmov ebx,0\nint 0x80";
 
-	translation["C_INPUT"] = "mov eax,3\n\
-								mov ebx,0\n\
-								mov ecx, _L1\n\
-								mov edx, 1\n\
-								int 0x80";
+	translation["C_INPUT"] = "mov eax,3\nmov ebx,0\nmov ecx, _L1\nmov edx, 1\nint 0x80";
 
-	translation["C_OUTPUT"] = "mov eax,4\n\
-								mov ebx,1\n\
-								mov ecx, _L1\n\
-								mov edx,1\n\
-								int 0x80";
+	translation["C_OUTPUT"] = "mov eax,4\nmov ebx,1\nmov ecx, _L1\nmov edx,1\nint 0x80";
 
 	translation["JMP"] = "jmp _L1";
 
-	translation["JMPZ"] = "cmp ax,0\n\
-							je _L1";
+	translation["JMPZ"] = "cmp ax,0\nje _L1";
 
-	translation["JMPP"] = "cmp ax,0\n\
-							jg _L1";
+	translation["JMPP"] = "cmp ax,0\njg _L1";
 
-	translation["JMPN"] = "cmp ax,0\n\
-							jl _L1";
+	translation["JMPN"] = "cmp ax,0\njl _L1";
 
 	translation["LOAD"] = "mov ax,_L1";
 
@@ -368,9 +355,11 @@ vector<int> PARSER::passagem_unica(code_t code)
     unsigned int PC=0;
     int sinal;
     code_t _code = code;
+	code_t const_lines;
     tsum_t sum_list;
 	vector<inst_t> instrucoes;
 	vector<inst_t>::iterator inst_it;
+	vector<space_t> space_code;
     code_t::iterator linha = _code.begin();
     tsmb_t::iterator last_symbol;
     unsigned int increment_add;
@@ -379,7 +368,9 @@ vector<int> PARSER::passagem_unica(code_t code)
 	bool is_inst = false;
 	int end_first_section = 0;
 	bool text_first=true;
+	bool no_label = false;
 	inst_t *rinst = NULL;
+	string text_ia32 = "";
 
     while(linha!=_code.end())
     {
@@ -389,16 +380,18 @@ vector<int> PARSER::passagem_unica(code_t code)
         is_soma = false;
 		is_inst = false;
 		has_label = false;
+		no_label = false;
 
         sinal = 1;
         vector<string>::iterator token = linha->tokens.begin();
 
+		if (find(linha->tokens.begin(), linha->tokens.end(), "SPACE") != linha->tokens.end() ) {
+			no_label = true;
+		}
 
         while(token!=linha->tokens.end())
         {
-            increment_add = 1; //Ao chegar num novo token o incremento do endereco eh sempre 1
 
-			/*Confere se tem soma ou subtração*/
 //TOKEN == +
             if ((*token) == "+")
             {
@@ -442,32 +435,23 @@ vector<int> PARSER::passagem_unica(code_t code)
 
 					}
 				}
+				string n = linha->tokens.size() > 2 ? linha->tokens.at(2) : "1";
+				space_code.push_back(space_t(linha->tokens.at(0), n));
 			}
 //TOKEN anterior é CONST
             else if(const_found)
             {
-				/////
+				text_ia32.pop_back();
+				text_ia32 += *token + "\n";
+				//const_code.push_back(const_t(linha->tokens.at(0), linha->tokens.at(2)));
             }
 //TOKEN é uma label
             else if(islabel(*token))
             {
-					increment_add = 0; //Se for uma label não aumenta o endereço
-					int i = symbol_exists(token->substr(0, token->length() - 1));
-
-					/*Se label ja existe*/
-					if (i > -1)
-					{
-						simb_list[i].def = true;
-						simb_list[i].value = PC;
-						last_symbol = simb_list.begin() + i;
-
-					}
-					else
-					{
-						simb_list.push_back(smb_t(token->substr(0,token->length()-1), PC, true));
-						last_symbol = simb_list.end() - 1;
-					}
 					has_label = true;
+					if(!no_label) {
+						text_ia32 += *token + " ";
+					}
             }
 //TOKEN é uma instrução
             else if(isinst(*token,rinst)) /**Refazer para melhorar a estrutura de instrucoes e diretivas**/
@@ -484,15 +468,14 @@ vector<int> PARSER::passagem_unica(code_t code)
                 {
                     space_found = true;
                     increment_add=1;
-                }
-                else if(*token == diretivas::CONST)
-                {
-                    const_found = true;
-                    if(simb_list.size() > 0)
-                    {
-                        last_symbol->is_const = true;
-                    }
+
+
+                } else if(*token == diretivas::CONST) {
+					const_found = true;
+					text_ia32 += "dw 1";
+				
 				}
+//TOKEN é uma secao
 				else if(*token == diretivas::SECTION)
 				{
 					if( *(token + 1) == "TEXT" ) {
@@ -505,6 +488,9 @@ vector<int> PARSER::passagem_unica(code_t code)
 						{
 							end_first_section = PC;
 						}
+
+						text_ia32 += "section .text\nglobal _start\n_start:\n";
+
 						section_text = true;
 					} else if( *(token + 1) == "DATA" ) {
 						if(!PC)
@@ -516,6 +502,8 @@ vector<int> PARSER::passagem_unica(code_t code)
 						{
 							end_first_section = PC;
 						}
+						text_ia32 += "section .data\n";
+
 						section_text = false;	
 					} else {
 						section_text = false;	
@@ -534,19 +522,25 @@ vector<int> PARSER::passagem_unica(code_t code)
             PC+=increment_add; /**Nao pode contar diretivas**/
         }
         linha++;
-	}
 
-		string text_ia32;
-
-		for (int i = 0; i < instrucoes.size(); i++) {
-			text_ia32 += translate(&instrucoes[i]);
+		if(is_inst) {
+			text_ia32 += translate(&(instrucoes.back()));
 			text_ia32 += "\n";
 		}
+	}
 
-		cout << text_ia32;
+	if (!space_code.empty()) {
+		text_ia32 += "section .bss\n";
 
-		vector<int> loko;
-		return loko;
+		for (int i = 0; i < space_code.size(); i++) {
+			text_ia32 += space_code[i].label + " resw " + space_code[i].num + "\n";
+		}
+	}
+
+	cout << text_ia32;
+
+	vector<int> loko;
+	return loko;
 
 }
 
@@ -699,8 +693,6 @@ std::string PARSER::ReplaceAll(std::string str, const std::string& from, const s
 
 string PARSER::translate(inst_t* rinst) 
 {
-	char buffer[5];
-	int i=0;
 	string new_code = PARSER::translation[rinst->name];
 	string aux = "_L1";
 	for (int i = 0; i < rinst->arg_list.size(); i++) {

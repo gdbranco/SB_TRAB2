@@ -18,8 +18,8 @@ namespace instructions
     string COPY   = "COPY";
     string LOAD   = "LOAD";
     string STORE  = "STORE";
-    string INPUT  = "INPUT";
-    string OUTPUT = "OUTPUT";
+    string C_INPUT  = "C_INPUT";
+    string C_OUTPUT = "C_OUTPUT";
     string STOP   = "STOP";
 }
 namespace diretivas

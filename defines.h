@@ -50,6 +50,13 @@ typedef struct _smb
 } smb_t;
 typedef vector<smb_t> tsmb_t;
 
+struct space_t 
+{
+	string label;
+	string num;
+	space_t(string _label, string _num) : label(_label), num(_num) {}
+};
+
 typedef struct sum_t
 {
     string simb;
@@ -172,8 +179,8 @@ extern string JMPZ;
 extern string COPY;
 extern string LOAD;
 extern string STORE;
-extern string INPUT;
-extern string OUTPUT;
+extern string C_INPUT;
+extern string C_OUTPUT;
 extern string STOP;
 }
 
