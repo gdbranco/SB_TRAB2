@@ -1,0 +1,3 @@
+ADD L1
+SUB L2
+MULT L3

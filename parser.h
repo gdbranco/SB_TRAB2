@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <string>
 #include "defines.h"
 #include "MacroTable.h"
 //TODO:

@@ -70,7 +70,7 @@ void PARSER::inicializa_paradas()
 
 	translation["ADD"] = "add ax, _L1";
 
-	translation["SUB"] = "sub ax,_L1";
+	translation["SUB"] = "sub ax, _L1";
 
 	translation["MULT"] = "mul _L1";
 
@@ -369,6 +369,8 @@ vector<int> PARSER::passagem_unica(code_t code)
     int sinal;
     code_t _code = code;
     tsum_t sum_list;
+	vector<inst_t> instrucoes;
+	vector<inst_t>::iterator inst_it;
     code_t::iterator linha = _code.begin();
     tsmb_t::iterator last_symbol;
     unsigned int increment_add;
@@ -377,16 +379,17 @@ vector<int> PARSER::passagem_unica(code_t code)
 	bool is_inst = false;
 	int end_first_section = 0;
 	bool text_first=true;
-	inst_t *rinst;
+	inst_t *rinst = NULL;
 
     while(linha!=_code.end())
     {
+		rinst = new inst_t("");
         space_found = false;
         const_found = false;
         is_soma = false;
+		is_inst = false;
 		has_label = false;
 
-        }
         sinal = 1;
         vector<string>::iterator token = linha->tokens.begin();
 
@@ -402,8 +405,8 @@ vector<int> PARSER::passagem_unica(code_t code)
 				/*Confere se a expressão acaba prematuramente*/
 				is_soma = true;
 				increment_add = 0;
-				if(rinst->arg_list.size() > 0) {
-					rinst->arg_list[rinst->arg_list.size() - 1] += " + ";
+				if(inst_it->arg_list.size() > 0) {
+					inst_it->arg_list[inst_it->arg_list.size() - 1] += " + ";
 				}	
             }
 //TOKEN == -
@@ -412,8 +415,8 @@ vector<int> PARSER::passagem_unica(code_t code)
 				is_soma = true;
 				sinal = -1;
 				increment_add = 0;
-				if(rinst->arg_list.size() > 0) {
-					rinst->arg_list[rinst->arg_list.size() - 1] += " - ";
+				if(inst_it->arg_list.size() > 0) {
+					inst_it->arg_list[inst_it->arg_list.size() - 1] += " - ";
 				}	
             }
 //TOKEN anterior é + ou -
@@ -423,8 +426,8 @@ vector<int> PARSER::passagem_unica(code_t code)
 				/*Se é numero direto, soma*/
                 if (isNumber(*token))
                 {
-					if(rinst->arg_list.size() > 0) {
-						rinst->arg_list[rinst->arg_list.size() - 1] += (*token);
+					if(inst_it->arg_list.size() > 0) {
+						inst_it->arg_list[inst_it->arg_list.size() - 1] += (*token);
 					}	
                 }
             }
@@ -470,6 +473,8 @@ vector<int> PARSER::passagem_unica(code_t code)
             else if(isinst(*token,rinst)) /**Refazer para melhorar a estrutura de instrucoes e diretivas**/
             {
 				is_inst = true;
+				instrucoes.push_back(*rinst);
+				inst_it = instrucoes.end() - 1;
             }
 //TOKEN é uma diretiva
             else if(isdir(*token))
@@ -521,7 +526,7 @@ vector<int> PARSER::passagem_unica(code_t code)
             else if(isSymbol(*token))
             {
 				if(is_inst) {
-					rinst->arg_list.push_back(*token);
+					inst_it->arg_list.push_back(*token);
 				}
 
             }
@@ -529,6 +534,19 @@ vector<int> PARSER::passagem_unica(code_t code)
             PC+=increment_add; /**Nao pode contar diretivas**/
         }
         linha++;
+	}
+
+		string text_ia32;
+
+		for (int i = 0; i < instrucoes.size(); i++) {
+			text_ia32 += translate(&instrucoes[i]);
+			text_ia32 += "\n";
+		}
+
+		cout << text_ia32;
+
+		vector<int> loko;
+		return loko;
 
 }
 
@@ -658,12 +676,11 @@ bool PARSER::isinst(string _inst,inst_t* rinst)
     {
         if(*inst_cur == _inst)
         {
-			if(rinst != NULL) {
-				delete rinst;
-			}
 
-            rinst = new inst_t(*inst_cur);
+            rinst->name = *inst_cur;
+			rinst->arg_list.clear();
             achei = true;
+			break;
         }
         inst_cur++;
     }
@@ -674,16 +691,17 @@ std::string PARSER::ReplaceAll(std::string str, const std::string& from, const s
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+        start_pos += to.length(); 
     }
     return str;
 }
 
 string PARSER::translate(inst_t* rinst) {
 	string new_code = PARSER::translation[rinst->name];
-	vector<string>::iterator arg_it;
+	string aux = "_L1";
 	for (int i = 0; i < rinst->arg_list.size(); i++) {
-		new_code = ReplaceAll(new_code, "_L"+i+1, (*arg_it));
+		aux = "_L"+ to_string(i+1);
+		new_code = ReplaceAll(new_code, aux, rinst->arg_list[i]);
 	}
 	return new_code;
 }

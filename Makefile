@@ -1,6 +1,6 @@
 .PHONY: prog
 
-CFLAGS=-ansi -Wall -c -g
+CFLAGS=-ansi -Wall -std=c++11 -c -g
 
 all: prog
 
