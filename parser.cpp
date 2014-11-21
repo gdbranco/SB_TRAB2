@@ -538,7 +538,7 @@ vector<int> PARSER::passagem_unica(code_t code)
 
 		string text_ia32;
 
-		for (int i = 0; i < instrucoes.size(); i++) {
+		for (int i = 0; i < (int)instrucoes.size(); i++) {
 			text_ia32 += translate(&instrucoes[i]);
 			text_ia32 += "\n";
 		}
@@ -699,11 +699,9 @@ std::string PARSER::ReplaceAll(std::string str, const std::string& from, const s
 
 string PARSER::translate(inst_t* rinst) 
 {
-	char buffer[5];
-	int i=0;
 	string new_code = PARSER::translation[rinst->name];
 	string aux = "_L1";
-	for (int i = 0; i < rinst->arg_list.size(); i++) {
+	for (unsigned int i = 0; i < rinst->arg_list.size(); i++) {
 		aux = "_L"+ to_string(i+1);
 		new_code = ReplaceAll(new_code, aux, rinst->arg_list[i]);
 	}
