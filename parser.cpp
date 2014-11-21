@@ -695,7 +695,7 @@ string PARSER::translate(inst_t* rinst)
 {
 	string new_code = PARSER::translation[rinst->name];
 	string aux = "_L1";
-	for (int i = 0; i < rinst->arg_list.size(); i++) {
+	for (unsigned int i = 0; i < rinst->arg_list.size(); i++) {
 		aux = "_L"+ to_string(i+1);
 		new_code = ReplaceAll(new_code, aux, rinst->arg_list[i]);
 	}
