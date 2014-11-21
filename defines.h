@@ -181,6 +181,8 @@ extern string LOAD;
 extern string STORE;
 extern string C_INPUT;
 extern string C_OUTPUT;
+extern string INPUT;
+extern string OUTPUT;
 extern string STOP;
 }
 

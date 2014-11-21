@@ -43,6 +43,10 @@ void PARSER::inicializa_paradas()
 
 	translation["C_OUTPUT"] = "mov eax,4\nmov ebx,1\nmov ecx, _L1\nmov edx,1\nint 0x80";
 
+	translation["INPUT"] = "mov eax,3\nmov ebx,0\nmov ecx, _L1\nmov edx, 1\nint 0x80\nsub [_L1], 0x30\n";
+
+	translation["OUTPUT"] = "add [_L1], 0x30\nmov eax,4\nmov ebx,1\nmov ecx, _L1\nmov edx,1\nint 0x80sub [_L1], 0x30\n";
+
 	translation["JMP"] = "jmp _L1";
 
 	translation["JMPZ"] = "cmp ax,0\nje _L1";
@@ -55,13 +59,13 @@ void PARSER::inicializa_paradas()
 
 	translation["STORE"] = "mov [_L1],eax";
 
-	translation["ADD"] = "add ax, _L1";
+	translation["ADD"] = "add ax, [_L1]";
 
-	translation["SUB"] = "sub ax, _L1";
+	translation["SUB"] = "sub ax, [_L1]";
 
-	translation["MULT"] = "mul _L1";
+	translation["MULT"] = "mul [_L1]";
 
-	translation["DIV"] = "div _L1";
+	translation["DIV"] = "div [_L1]";
 
 	translation["COPY"] = "copy _L1";
 }
