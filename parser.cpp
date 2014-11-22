@@ -35,6 +35,8 @@ void PARSER::inicializa_paradas()
     instruction_list.push_back(instructions::STORE);
     instruction_list.push_back(instructions::C_INPUT);
     instruction_list.push_back(instructions::C_OUTPUT);
+    instruction_list.push_back(instructions::INPUT);
+    instruction_list.push_back(instructions::OUTPUT);
     instruction_list.push_back(instructions::STOP);
 
 	translation["STOP"] = "mov eax,1\nmov ebx,0\nint 0x80";
@@ -43,9 +45,9 @@ void PARSER::inicializa_paradas()
 
 	translation["C_OUTPUT"] = "mov eax,4\nmov ebx,1\nmov ecx, _L1\nmov edx,1\nint 0x80";
 
-	translation["INPUT"] = "mov eax,3\nmov ebx,0\nmov ecx, _L1\nmov edx, 1\nint 0x80\nsub [_L1], 0x30\n";
+	translation["INPUT"] = "mov eax,3\nmov ebx,0\nmov ecx, _L1\nmov edx, 1\nint 0x80\nsub [_L1], 0x30";
 
-	translation["OUTPUT"] = "add [_L1], 0x30\nmov eax,4\nmov ebx,1\nmov ecx, _L1\nmov edx,1\nint 0x80sub [_L1], 0x30\n";
+	translation["OUTPUT"] = "add [_L1], 0x30\nmov eax,4\nmov ebx,1\nmov ecx, _L1\nmov edx,1\nint 0x80\nsub [_L1], 0x30";
 
 	translation["JMP"] = "jmp _L1";
 
