@@ -5,5 +5,5 @@ MULT L3
 C_INPUT L4
 stop
 section data
-bra: space 2
-sut: const 5
+bra: space 
+sut: const 2

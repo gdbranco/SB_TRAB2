@@ -39,35 +39,35 @@ void PARSER::inicializa_paradas()
     instruction_list.push_back(instructions::OUTPUT);
     instruction_list.push_back(instructions::STOP);
 
-	translation["STOP"] = "mov eax,1\nmov ebx,0\nint 0x80";
+	translation["STOP"] = "mov eax, 1\nmov ebx, 0\nint 0x80";
 
-	translation["C_INPUT"] = "mov eax,3\nmov ebx,0\nmov ecx, _L1\nmov edx, 1\nint 0x80";
+	translation["C_INPUT"] = "mov eax, 3\nmov ebx, 0\nmov ecx, _L1\nmov edx, 1\nint 0x80";
 
-	translation["C_OUTPUT"] = "mov eax,4\nmov ebx,1\nmov ecx, _L1\nmov edx,1\nint 0x80";
+	translation["C_OUTPUT"] = "mov eax, 4\nmov ebx, 1\nmov ecx, _L1\nmov edx, 1\nint 0x80";
 
-	translation["INPUT"] = "mov eax,3\nmov ebx,0\nmov ecx, _L1\nmov edx, 1\nint 0x80\nsub [_L1], 0x30";
+	translation["INPUT"] = "mov eax, 3\nmov ebx, 0\nmov ecx, _L1\nmov edx, 1\nint 0x80\nsub word [_L1], 0x30";
 
-	translation["OUTPUT"] = "add [_L1], 0x30\nmov eax,4\nmov ebx,1\nmov ecx, _L1\nmov edx,1\nint 0x80\nsub [_L1], 0x30";
+	translation["OUTPUT"] = "add word [_L1], 0x30\nmov eax, 4\nmov ebx, 1\nmov ecx, _L1\nmov edx, 1\nint 0x80\nsub word [_L1], 0x30";
 
 	translation["JMP"] = "jmp _L1";
 
-	translation["JMPZ"] = "cmp ax,0\nje _L1";
+	translation["JMPZ"] = "cmp ax, 0\nje _L1";
 
-	translation["JMPP"] = "cmp ax,0\njg _L1";
+	translation["JMPP"] = "cmp ax, 0\njg _L1";
 
-	translation["JMPN"] = "cmp ax,0\njl _L1";
+	translation["JMPN"] = "cmp ax, 0\njl _L1";
 
-	translation["LOAD"] = "mov ax,_L1";
+	translation["LOAD"] = "mov ax, [_L1]";
 
-	translation["STORE"] = "mov [_L1],eax";
+	translation["STORE"] = "mov [_L1], ax";
 
-	translation["ADD"] = "add ax, [_L1]";
+	translation["ADD"] = "add word ax, [_L1]";
 
-	translation["SUB"] = "sub ax, [_L1]";
+	translation["SUB"] = "sub word ax, [_L1]";
 
-	translation["MULT"] = "mul [_L1]";
+	translation["MULT"] = "mul word [_L1]";
 
-	translation["DIV"] = "div [_L1]";
+	translation["DIV"] = "div word [_L1]";
 
 	translation["COPY"] = "copy _L1";
 }
@@ -397,7 +397,6 @@ vector<int> PARSER::passagem_unica(code_t code)
 
         while(token!=linha->tokens.end())
         {
-
 //TOKEN == +
             if ((*token) == "+")
             {
@@ -441,7 +440,7 @@ vector<int> PARSER::passagem_unica(code_t code)
 
 					}
 				}
-				string n = linha->tokens.size() > 2 ? linha->tokens.at(2) : "1";
+				string n = linha->tokens.at(2);
 				space_code.push_back(space_t(linha->tokens.at(0), n));
 			}
 //TOKEN anterior é CONST
@@ -475,11 +474,9 @@ vector<int> PARSER::passagem_unica(code_t code)
                     space_found = true;
                     increment_add=1;
 
-
                 } else if(*token == diretivas::CONST) {
 					const_found = true;
 					text_ia32 += "dw 1";
-				
 				}
 //TOKEN é uma secao
 				else if(*token == diretivas::SECTION)
@@ -527,6 +524,10 @@ vector<int> PARSER::passagem_unica(code_t code)
             token++;
             PC+=increment_add; /**Nao pode contar diretivas**/
         }
+		if(space_found)
+		{	
+				space_code.push_back(space_t(linha->tokens.at(0),"1"));
+		}
         linha++;
 
 		if(is_inst) {
@@ -538,7 +539,7 @@ vector<int> PARSER::passagem_unica(code_t code)
 	if (!space_code.empty()) {
 		text_ia32 += "section .bss\n";
 
-		for (int i = 0; i < space_code.size(); i++) {
+		for (unsigned int i = 0; i < space_code.size(); i++) {
 			text_ia32 += space_code[i].label + " resw " + space_code[i].num + "\n";
 		}
 	}
