@@ -67,7 +67,7 @@ void PARSER::inicializa_paradas()
 
 	translation["MULT"] = "mul word [_L1]";
 
-	translation["DIV"] = "div word [_L1]";
+	translation["DIV"] = "xor dx, dx\ndiv word [_L1]";
 
 	translation["COPY"] = "copy _L1";
 }
