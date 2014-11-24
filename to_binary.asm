@@ -8,8 +8,10 @@ load QUOT
 store B
 end
 
-input B
 
+s_input teste
+s_output teste
+input B
 loop:
 load B
 div DOIS
@@ -31,5 +33,4 @@ DOIS: CONST 2
 QUOT: SPACE
 resto: SPACE
 volta: space
-offset: const 1
-lol: EqU 1
+teste: space 10

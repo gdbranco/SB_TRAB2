@@ -6,9 +6,6 @@ string PARSER::retiraComentarios(string _linha)
     size_t found = _linha.find(';');
     if(found!=string::npos)
     {
-        //        cout << _linha << endl;
-        //        cout << found;
-        //        cin.get();
         if(found == 0)
         {
             _linha = "";
@@ -35,6 +32,8 @@ void PARSER::inicializa_paradas()
     instruction_list.push_back(instructions::STORE);
     instruction_list.push_back(instructions::C_INPUT);
     instruction_list.push_back(instructions::C_OUTPUT);
+    instruction_list.push_back(instructions::S_INPUT);
+    instruction_list.push_back(instructions::S_OUTPUT);
     instruction_list.push_back(instructions::INPUT);
     instruction_list.push_back(instructions::OUTPUT);
     instruction_list.push_back(instructions::STOP);
@@ -44,6 +43,10 @@ void PARSER::inicializa_paradas()
 	translation["C_INPUT"] = "mov eax, 3\nmov ebx, 0\nmov ecx, _L1\nmov edx, 1\nint 0x80";
 
 	translation["C_OUTPUT"] = "mov eax, 4\nmov ebx, 1\nmov ecx, _L1\nmov edx, 1\nint 0x80";
+
+	translation["S_INPUT"] = "push _L2\npush _L1\ncall __read_string";
+
+	translation["S_OUTPUT"] = "push _L1\ncall __print_string";
 
 	translation["INPUT"] = "mov eax, 3\nmov ebx, 0\nmov ecx, _L1\nmov edx, 1\nint 0x80\nsub word [_L1], 0x30";
 
@@ -364,8 +367,10 @@ vector<int> PARSER::passagem_unica(code_t code)
 	code_t const_lines;
     tsum_t sum_list;
 	vector<inst_t> instrucoes;
+	vector<inst_t> s_read_list;
 	vector<inst_t>::iterator inst_it;
 	vector<space_t> space_code;
+	vector<unsigned int> string_index_list;
     code_t::iterator linha = _code.begin();
     tsmb_t::iterator last_symbol;
     unsigned int increment_add;
@@ -377,6 +382,8 @@ vector<int> PARSER::passagem_unica(code_t code)
 	bool no_label = false;
 	inst_t *rinst = NULL;
 	string text_ia32 = "";
+	string num_space = "";
+	string n = "1"; 
 
     while(linha!=_code.end())
     {
@@ -387,6 +394,7 @@ vector<int> PARSER::passagem_unica(code_t code)
 		is_inst = false;
 		has_label = false;
 		no_label = false;
+		n = "1";
 
         sinal = 1;
         vector<string>::iterator token = linha->tokens.begin();
@@ -440,8 +448,8 @@ vector<int> PARSER::passagem_unica(code_t code)
 
 					}
 				}
-				string n = linha->tokens.at(2);
-				space_code.push_back(space_t(linha->tokens.at(0), n));
+				n = linha->tokens.at(2);
+				linha->tokens.at(0).pop_back();
 			}
 //TOKEN anterior é CONST
             else if(const_found)
@@ -492,7 +500,11 @@ vector<int> PARSER::passagem_unica(code_t code)
 							end_first_section = PC;
 						}
 
-						text_ia32 += "section .text\nglobal _start\n_start:\n";
+						text_ia32 += "section .text\nglobal _start\n";
+						text_ia32 += nasm_functions::__read_string;
+						text_ia32 += nasm_functions::__print_string;
+						text_ia32 += "\n\n";
+						text_ia32 += "_start:\n";
 
 						section_text = true;
 					} else if( *(token + 1) == "DATA" ) {
@@ -517,7 +529,16 @@ vector<int> PARSER::passagem_unica(code_t code)
             else if(isSymbol(*token))
             {
 				if(is_inst) {
-					inst_it->arg_list.push_back(*token);
+					if(inst_it->name == instructions::S_INPUT) {
+						inst_it->arg_list.push_back(*token);
+
+						s_read_list.push_back(*inst_it);
+						string_index_list.push_back(text_ia32.size());
+
+						is_inst = false;
+					} else {
+						inst_it->arg_list.push_back(*token);
+					}
 				}
 
             }
@@ -526,7 +547,7 @@ vector<int> PARSER::passagem_unica(code_t code)
         }
 		if(space_found)
 		{	
-				space_code.push_back(space_t(linha->tokens.at(0),"1"));
+				space_code.push_back(space_t(linha->tokens.at(0), n));
 		}
         linha++;
 
@@ -543,6 +564,33 @@ vector<int> PARSER::passagem_unica(code_t code)
 			text_ia32 += space_code[i].label + " resw " + space_code[i].num + "\n";
 		}
 	}
+
+_str:
+	int s_ind = 0;
+	string aux = "";
+	if (!s_read_list.empty()) {
+		for(auto it = s_read_list.begin(); it != s_read_list.end(); it++) {
+			aux = "";
+			num_space = "";
+			for(auto sp_it = space_code.begin(); sp_it != space_code.end(); sp_it++) {
+				if(sp_it->label == it->arg_list[0]) {
+					num_space = sp_it->num;		
+					break;
+				}
+			}
+			it->arg_list.push_back(num_space);
+			aux += translate(&(*it));
+			aux += "\n";
+			text_ia32.insert(string_index_list[s_ind], aux);
+
+			s_ind++;
+		}	
+	}
+	
+	//text_ia32 += "section .text\n";
+
+	//text_ia32 += nasm_functions::__read_string;
+	//text_ia32 += nasm_functions::__print_string;
 
 	cout << text_ia32;
 

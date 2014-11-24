@@ -181,6 +181,8 @@ extern string LOAD;
 extern string STORE;
 extern string C_INPUT;
 extern string C_OUTPUT;
+extern string S_INPUT;
+extern string S_OUTPUT;
 extern string INPUT;
 extern string OUTPUT;
 extern string STOP;
@@ -197,5 +199,11 @@ extern string EQU;
 extern string IF;
 extern string MACRO;
 extern string END;
+}
+
+namespace nasm_functions
+{
+extern string __print_string;
+extern string __read_string;
 }
 #endif // DEFINE_H
