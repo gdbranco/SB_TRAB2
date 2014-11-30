@@ -383,6 +383,8 @@ string PARSER::passagem_unica(code_t code)
 
     while(linha!=_code.end())
     {
+		if(rinst!=NULL)
+			delete rinst;
 		rinst = new inst_t("");
         space_found = false;
         const_found = false;
@@ -555,11 +557,8 @@ string PARSER::passagem_unica(code_t code)
 			s_ind++;
 		}	
 	}
-	
-
-	space_code.erase(space_code.begin(),space_code.end());
-	instruction_list.erase(instruction_list.begin(),instruction_list.end());
-	delete rinst;
+	if(rinst!=NULL)
+		delete rinst;	
 	return text_ia32;
 }
 
