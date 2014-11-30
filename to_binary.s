@@ -2,7 +2,6 @@ section .text
 global _start
 __read_string:
 enter 0,0
-push eax
 push ebx
 push ecx
 push edx
@@ -29,6 +28,8 @@ __end_read:
 mov ecx, [ebp + 8]
 add ecx, esi
 ;add ecx, 1
+dec si
+mov ax, si
 mov byte [ecx], 0x0A
 jmp __end_read_string
 
@@ -41,15 +42,12 @@ mov ebx, 1
 mov ecx, __ERROR_MSG
 mov edx, __ERROR_MSG_SIZE
 int 0x80
-mov eax, 1
-mov ebx, 0
-int 0x80
+mov ax, 0
 __end_read_string:
 pop esi
 pop edx
 pop ecx
 pop ebx
-pop eax
 leave
 ret 8
 __print_string:
@@ -123,7 +121,7 @@ mov eax, 1
 mov ebx, 0
 int 0x80
 section .data
-__ERROR_MSG: db "Error: Utilizado mais memoria do que alocado",0ah
+__ERROR_MSG: db "Error: Tentativa de acesso a memória não reservada",0ah
 __ERROR_MSG_SIZE: EQU $-__ERROR_MSG
 DOIS: dw 2
 section .bss

@@ -359,7 +359,7 @@ code_t PARSER::passagem_macros(code_t _code)
 }
 
 /**Metodo montador**/
-vector<int> PARSER::passagem_unica(code_t code)
+string PARSER::passagem_unica(code_t code)
 {
     unsigned int PC=0;
     int sinal;
@@ -520,7 +520,7 @@ vector<int> PARSER::passagem_unica(code_t code)
 							end_first_section = PC;
 						}
 						text_ia32 += "section .data\n";
-						text_ia32 += "__ERROR_MSG: db \"Error: Utilizado mais memoria do que alocado\",0ah\n";
+						text_ia32 += "__ERROR_MSG: db \"Error: Tentativa de acesso a memoria nao reservada\",0ah\n";
 						text_ia32 += "__ERROR_MSG_SIZE: EQU $-__ERROR_MSG\n";
 
 						section_text = false;	
@@ -591,14 +591,12 @@ _str:
 		}	
 	}
 	
-	cout << text_ia32;
+	//cout << text_ia32;
 
 	space_code.erase(space_code.begin(),space_code.end());
 	instruction_list.erase(instruction_list.begin(),instruction_list.end());
 	delete rinst;
-	vector<int> loko;
-	return loko;
-
+	return text_ia32;
 }
 
 code_t PARSER::run_macros(code_t code)
@@ -608,12 +606,10 @@ code_t PARSER::run_macros(code_t code)
     return code;
 }
 
-vector<int> PARSER::run_montador(code_t code)
+string PARSER::run_montador(code_t code)
 {
     PARSER p;
-	vector<int> obj_code;
-    obj_code = p.passagem_unica(code);
-    return obj_code;
+    return  p.passagem_unica(code);
 }
 int PARSER::define_exists(define_t procura)
 {
