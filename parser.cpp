@@ -217,7 +217,7 @@ code_t PARSER::make_listaEQU(code_t _code)
     bool EQU;
     int label_counter;
     int value;
-    int erro;
+    //int erro;
     string label;
     if(!code.empty())
     {
@@ -239,7 +239,7 @@ code_t PARSER::make_listaEQU(code_t _code)
             erased = false;
             labeled = false;
             EQU = false;
-            erro = 0;
+            //erro = 0;
             label.clear();
             label_counter=0;
             token = linha->tokens.begin();
@@ -362,7 +362,6 @@ code_t PARSER::passagem_macros(code_t _code)
 string PARSER::passagem_unica(code_t code)
 {
     unsigned int PC=0;
-    int sinal;
     code_t _code = code;
 	code_t const_lines;
     tsum_t sum_list;
@@ -374,11 +373,8 @@ string PARSER::passagem_unica(code_t code)
     code_t::iterator linha = _code.begin();
     tsmb_t::iterator last_symbol;
     unsigned int increment_add;
-    bool space_found, const_found, is_soma, has_label;
-	bool section_text = true;
+    bool space_found, const_found, is_soma;//, has_label;
 	bool is_inst = false;
-	int end_first_section = 0;
-	bool text_first=true;
 	bool no_label = false;
 	inst_t *rinst = NULL;
 	string text_ia32 = "";
@@ -392,11 +388,9 @@ string PARSER::passagem_unica(code_t code)
         const_found = false;
         is_soma = false;
 		is_inst = false;
-		has_label = false;
 		no_label = false;
 		n = "1";
 
-        sinal = 1;
         vector<string>::iterator token = linha->tokens.begin();
 
 		if (find(linha->tokens.begin(), linha->tokens.end(), "SPACE") != linha->tokens.end() ) {
@@ -419,7 +413,6 @@ string PARSER::passagem_unica(code_t code)
             else if ((*token) == "-")
             {
 				is_soma = true;
-				sinal = -1;
 				increment_add = 0;
 				if(inst_it->arg_list.size() > 0) {
 					inst_it->arg_list[inst_it->arg_list.size() - 1] += " - ";
@@ -458,12 +451,10 @@ string PARSER::passagem_unica(code_t code)
             {
 				text_ia32.pop_back();
 				text_ia32 += *token + "\n";
-				//const_code.push_back(const_t(linha->tokens.at(0), linha->tokens.at(2)));
             }
 //TOKEN é uma label
             else if(islabel(*token))
             {
-					has_label = true;
 					if(!no_label) {
 						text_ia32 += *token + " ";
 					}
@@ -492,40 +483,15 @@ string PARSER::passagem_unica(code_t code)
 				else if(*token == diretivas::SECTION)
 				{
 					if( *(token + 1) == "TEXT" ) {
-						if(PC == 0)
-						{
-							text_first = true;
-							section_text = true;	
-						}
-						if(!section_text)
-						{
-							end_first_section = PC;
-						}
-
 						text_ia32 += "section .text\nglobal _start\n";
 						text_ia32 += nasm_functions::__read_string;
 						text_ia32 += nasm_functions::__print_string;
 						text_ia32 += "\n\n";
 						text_ia32 += "_start:\n";
-
-						section_text = true;
 					} else if( *(token + 1) == "DATA" ) {
-						if(!PC)
-						{
-							text_first = false;
-							section_text = false;	
-						}
-						if(section_text)
-						{
-							end_first_section = PC;
-						}
 						text_ia32 += "section .data\n";
 						text_ia32 += "__ERROR_MSG: db \"Error: Tentativa de acesso a memoria nao reservada\",0ah\n";
 						text_ia32 += "__ERROR_MSG_SIZE: EQU $-__ERROR_MSG\n";
-
-						section_text = false;	
-					} else {
-						section_text = false;	
 					}
 				}
             }
@@ -569,7 +535,6 @@ string PARSER::passagem_unica(code_t code)
 		}
 	}
 
-_str:
 	int s_ind = 0;
 	string aux = "";
 	if (!s_read_list.empty()) {
@@ -591,7 +556,6 @@ _str:
 		}	
 	}
 	
-	//cout << text_ia32;
 
 	space_code.erase(space_code.begin(),space_code.end());
 	instruction_list.erase(instruction_list.begin(),instruction_list.end());
