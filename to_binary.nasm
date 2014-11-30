@@ -94,18 +94,18 @@ push TESTE
 call __print_string
 mov eax, 3
 mov ebx, 0
-mov ecx, B
+mov ecx, B + 2
 mov edx, 1
 int 0x80
-sub word [B], 0x30
-LOOP: mov ax, [B]
+sub word [B + 2], 0x30
+LOOP: mov ax, [B + 2]
 xor dx, dx
 div word [DOIS]
 mov [QUOT], ax
 mov ax, [QUOT]
 mul word [DOIS]
 mov [VOLTA], ax
-mov ax, [B]
+mov ax, [B + 2]
 sub word ax, [VOLTA]
 mov [RESTO], ax
 add word [RESTO], 0x30
@@ -116,7 +116,7 @@ mov edx, 1
 int 0x80
 sub word [RESTO], 0x30
 mov ax, [QUOT]
-mov [B], ax
+mov [B + 2], ax
 cmp ax, 0
 jg LOOP
 mov eax, 1
@@ -127,7 +127,7 @@ __ERROR_MSG: db "Error: Utilizado mais memoria do que alocado",0ah
 __ERROR_MSG_SIZE: EQU $-__ERROR_MSG
 DOIS: dw 2
 section .bss
-B: resw 1
+B resw 2
 QUOT: resw 1
 RESTO: resw 1
 VOLTA: resw 1

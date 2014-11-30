@@ -432,8 +432,10 @@ vector<int> PARSER::passagem_unica(code_t code)
 				/*Se é numero direto, soma*/
                 if (isNumber(*token))
                 {
+					int aux = atoi(token->c_str());
+					aux *= 2;
 					if(inst_it->arg_list.size() > 0) {
-						inst_it->arg_list[inst_it->arg_list.size() - 1] += (*token);
+						inst_it->arg_list[inst_it->arg_list.size() - 1] += to_string(aux);
 					}	
                 }
             }
