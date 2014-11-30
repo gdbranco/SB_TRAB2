@@ -36,6 +36,14 @@ __end_read_full:
 mov ecx, [ebp + 8]
 add ecx, esi
 mov byte [ecx - 1], 0x0a
+mov eax, 4
+mov ebx, 1
+mov ecx, __ERROR_MSG
+mov edx, __ERROR_MSG_SIZE
+int 0x80
+mov eax, 1
+mov ebx, 0
+int 0x80
 __end_read_string:
 pop esi
 pop edx
@@ -115,6 +123,8 @@ mov eax, 1
 mov ebx, 0
 int 0x80
 section .data
+__ERROR_MSG: db "Error: Utilizado mais memoria do que alocado",0ah
+__ERROR_MSG_SIZE: EQU $-__ERROR_MSG
 DOIS: dw 2
 section .bss
 B: resw 1

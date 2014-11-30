@@ -518,6 +518,8 @@ vector<int> PARSER::passagem_unica(code_t code)
 							end_first_section = PC;
 						}
 						text_ia32 += "section .data\n";
+						text_ia32 += "__ERROR_MSG: db \"Error: Utilizado mais memoria do que alocado\",0ah\n";
+						text_ia32 += "__ERROR_MSG_SIZE: EQU $-__ERROR_MSG\n";
 
 						section_text = false;	
 					} else {
@@ -587,13 +589,11 @@ _str:
 		}	
 	}
 	
-	//text_ia32 += "section .text\n";
-
-	//text_ia32 += nasm_functions::__read_string;
-	//text_ia32 += nasm_functions::__print_string;
-
 	cout << text_ia32;
 
+	space_code.erase(space_code.begin(),space_code.end());
+	instruction_list.erase(instruction_list.begin(),instruction_list.end());
+	delete rinst;
 	vector<int> loko;
 	return loko;
 
