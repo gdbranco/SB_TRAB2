@@ -1,0 +1,4 @@
+all: 
+	rm -f read_string.o
+	nasm -g -f elf -o read_string.o read_string.asm
+	ld -m elf_i386 -o read_string read_string.o
